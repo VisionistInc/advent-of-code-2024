@@ -1,0 +1,8 @@
+*.beam
+*.ez
+**/build
+erl_crash.dump
+
+# input.txt is not allowed to be in public repos
+# see https://adventofcode.com/about#faq_copying
+input.txt
