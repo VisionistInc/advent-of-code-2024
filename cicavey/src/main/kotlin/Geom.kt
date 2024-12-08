@@ -5,12 +5,14 @@ data class Point2(val x: Long, val y: Long) {
     constructor(x: Int, y: Int) : this(x.toLong(), y.toLong())
     operator fun plus(v: Vec2) = Point2(x + v.x, y + v.y)
     operator fun minus(v: Vec2) = Point2(x - v.x, y - v.y)
+    operator fun minus(p: Point2) = Vec2(x - p.x, y - p.y)
 }
 
 data class Vec2(val x: Long, val y: Long) {
     constructor(p: Point2) : this(p.x, p.y) {}
     operator fun plus(v: Vec2) = Vec2(x + v.x, y + v.y)
     operator fun minus(v: Vec2) = Point2(x - v.x, y - v.y)
+    operator fun times(s: Long) = Vec2(x * s, y * s)
     fun toPoint() = Point2(x, y)
 
     fun isVert() = y != 0L && x == 0L
@@ -46,6 +48,13 @@ class SparseGrid<T>(val defaultValue: T) {
     var maxX = 0L
     var minY = 0L
     var maxY = 0L
+
+    fun bounds(minX: Long, maxX: Long, minY: Long, maxY: Long) {
+        this.minX = minX
+        this.maxX = maxX
+        this.minY = minY
+        this.maxY = maxY
+    }
 
     fun get(x: Long, y: Long) = data.getOrDefault(Point2(x, y), defaultValue)
 
