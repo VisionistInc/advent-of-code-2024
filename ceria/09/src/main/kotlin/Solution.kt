@@ -1,15 +1,17 @@
 import java.io.File
-import idsToSize
-
-var expanded = mutableListOf<Long>()
-val idsToSize = mutableMapOf<Long, Int>()
-val freeIdxToSize = mutableMapOf<Int, Int>()
 
 fun main(args: Array<String>) {
    val lines = File(args.first()).readLines()
 
+   println("Solution 1: ${solution1(lines)}")
+   println("Solution 2: ${solution2(lines)}")
+}
+
+private fun solution1(lines: List<String>): Long {
+   var expanded = mutableListOf<Long>()
+   val idsToSize = mutableMapOf<Long, Int>()
+
    var ID = 0L
-   // var isFile = true
    lines[0].forEachIndexed { index, char ->
       if (index == 0 || index % 2 == 0) {
          var num = char.digitToInt()
@@ -18,22 +20,14 @@ fun main(args: Array<String>) {
             idsToSize.put(ID, num)
             ID++
          }
-         // isFile = false
       } else {
          var num = char.digitToInt()
          if (num > 0) {
             repeat(num) { expanded.add(-1L) }
          }
-         freeIdxToSize.put(index, num)
-         // isFile = true
       }
    }
-   freeIdxToSize.toSortedMap()
-   //  println("Solution 1: ${solution1(expanded)}")
-   println("Solution 2: ${solution2(expanded)}")
-}
 
-private fun solution1(expanded: MutableList<Long>): Long {
    while (!isCompacted(expanded)) {
       var freeMemIdx = expanded.indexOf(-1L)
       var fileIdx = expanded.indexOfLast { it != -1L }
@@ -43,49 +37,51 @@ private fun solution1(expanded: MutableList<Long>): Long {
    return checksum(expanded.subList(0, endFileIdx + 1))
 }
 
-private fun solution2(expanded: MutableList<Long>): Long {
-   // println(expanded)
-   var sortedIdsToSize = idsToSize.toSortedMap(reverseOrder())
+private fun solution2(lines: List<String>): Long {
+   var expanded = mutableListOf<Long>()
+   val idsToSize = mutableMapOf<Long, Int>()
 
+   var ID = 0L
+   lines[0].forEachIndexed { index, char ->
+      if (index == 0 || index % 2 == 0) {
+         var num = char.digitToInt()
+         if (num > 0) {
+            repeat(num) { expanded.add(ID) }
+            idsToSize.put(ID, num)
+            ID++
+         }
+      } else {
+         var num = char.digitToInt()
+         if (num > 0) {
+            repeat(num) { expanded.add(-1L) }
+         }
+      }
+   }
+
+   var sortedIdsToSize = idsToSize.toSortedMap(reverseOrder())
    var skipIdx = expanded.size - 1
    for ((fileId, size) in sortedIdsToSize) {
-      
       var lastIdIdx = expanded.indexOf(fileId)
 
       // look to the left, the sub list should be what's left of where we have processed
-      var startFreeMemIdx = expanded.subList(0, skipIdx).findFirstWindowWithSameElements(size)
-      // println("file is  ${fileId}    size is ${size}    skipIdx is ${skipIdx}  startFreeMemIdx is ${startFreeMemIdx}")
+      var startFreeMemIdx = expanded.subList(0, skipIdx + 1).findFirstWindowWithSameElements(size)
 
       if (startFreeMemIdx != null) {
          var endFreeMemIdx = startFreeMemIdx + size
-         if (endFreeMemIdx == lastIdIdx) {
-            println("#########################################333")
-         }
-         // if (endFreeMemIdx == lastIdIdx) {
-         //    // The empty space and file are right next to each other, and both are the same size
-         //    // This was my issue because swap does not handle
-         //    println("==============================================")
-         //    println("free start: ${startFreeMemIdx}    free end: ${endFreeMemIdx}")
-         //    println("file start index:  ${lastIdIdx}")
-         //    println("Value actually at the index in question   ${expanded[49279]}")
-         //    println(endFreeMemIdx - startFreeMemIdx)
-         //    println(size)
-         //    println("==============================================")
-           
-         // } else {
 
          for (i in startFreeMemIdx until endFreeMemIdx) {
             expanded.swap(i, lastIdIdx)
             lastIdIdx++
          }
-      // }
-         skipIdx = lastIdIdx - 1
+         // THIS IS THE TRICK
+         // Have to subtract 2, 1 to account for size being one mre than the same index space
+         // (i.e. a size of 4 fits in indexes 82 - 85), but also to put the pointer just before
+         // where the file began before it was moved, i.e don't process the same index twice.
+         skipIdx = lastIdIdx - size - 2
       } else {
          // no space big enough to the left to move this file
-         skipIdx = skipIdx - size
+         skipIdx = skipIdx - size - 1
       }
-
-      // println(expanded)
    }
 
    return checksum(expanded)
@@ -104,7 +100,7 @@ fun <Long> List<Long>.findFirstWindowWithSameElements(windowSize: Int): Int? {
    return null
 }
 
-fun <T> MutableList<T>.swap(index1: Int, index2: Int) {
+fun <Long> MutableList<Long>.swap(index1: Int, index2: Int) {
    val temp = this[index1]
    this[index1] = this[index2]
    this[index2] = temp
