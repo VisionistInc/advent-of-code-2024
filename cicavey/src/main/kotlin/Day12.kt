@@ -32,7 +32,7 @@ fun perimeter(g: SparseGrid<Char>, region: Set<Point2>): Long {
 }
 
 fun main() {
-    val grid = SparseGrid<Char>('.')
+    val grid = SparseGrid('.')
     File("src/main/kotlin/Day12.txt").readLines().forEachIndexed { y, line ->
         line.toCharArray().forEachIndexed { x, c ->
             grid.set(x, y, c)
@@ -55,4 +55,53 @@ fun main() {
     }
 
     println(regions.sumOf { it.second.size  * perimeter(grid, it.second)})
+
+    val p2 = regions.sumOf { (v, pts) ->
+        // pretend the region is in a grid alone
+        val lg = SparseGrid('.')
+        lg.setAll(pts, v)
+        var c = 0L
+        for(p in pts) {
+            val nval = lg.get(p + Vec2.N)
+            val sval = lg.get(p + Vec2.S)
+            val eval = lg.get(p + Vec2.E)
+            val wval = lg.get(p + Vec2.W)
+
+            val neval = lg.get(p + Vec2.NE)
+            val seval = lg.get(p + Vec2.SE)
+            val nwval = lg.get(p + Vec2.NW)
+            val swval = lg.get(p + Vec2.SW)
+
+            // Outside corners
+            if(nval == eval && nval != v) {
+                c++
+            }
+            if(nval == wval && nval != v) {
+                c++
+            }
+            if(sval == eval && sval != v) {
+                c++
+            }
+            if(sval == wval && sval != v) {
+                c++
+            }
+
+            // Insider corners
+            if(nval == eval && nval == v && neval != v) {
+                c++
+            }
+            if(nval == wval && nval == v && nwval != v) {
+                c++
+            }
+            if(sval == eval && sval == v && seval != v) {
+                c++
+            }
+            if(sval == wval && sval == v && swval != v) {
+                c++
+            }
+
+        }
+        c * pts.size
+    }
+    println(p2)
 }

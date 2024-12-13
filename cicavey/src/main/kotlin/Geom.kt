@@ -83,6 +83,10 @@ class SparseGrid<T>(val defaultValue: T) {
         set(p.x, p.y, value)
     }
 
+    fun setAll(p: Iterable<Point2>, value: T) {
+        p.forEach { set(it, value)}
+    }
+
     fun y() = LongRange(minY, maxY)
 
     fun x() = LongRange(minX, maxX)
