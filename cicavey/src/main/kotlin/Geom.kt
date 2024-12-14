@@ -6,10 +6,32 @@ data class Point2(val x: Long, val y: Long) {
     operator fun plus(v: Vec2) = Point2(x + v.x, y + v.y)
     operator fun minus(v: Vec2) = Point2(x - v.x, y - v.y)
     operator fun minus(p: Point2) = Vec2(x - p.x, y - p.y)
+
+    /**
+     * Find quadrant assuming a zero based grid of size w, h
+     */
+    fun q(w: Long, h: Long): Int {
+         if(x > w/2) {
+            if(y < h/2) {
+               return 1
+            } else if (y > h/2) {
+                return 4
+            }
+        } else if( x < w/2) {
+            if(y < h/2) {
+                return 2
+            } else if(y > h/2) {
+                return 3
+            }
+        }
+
+        return 0
+    }
 }
 
 data class Vec2(val x: Long, val y: Long) {
     constructor(p: Point2) : this(p.x, p.y) {}
+    constructor(x: Int, y: Int) : this(x.toLong(), y.toLong())
     operator fun plus(v: Vec2) = Vec2(x + v.x, y + v.y)
     operator fun minus(v: Vec2) = Point2(x - v.x, y - v.y)
     operator fun times(s: Long) = Vec2(x * s, y * s)
