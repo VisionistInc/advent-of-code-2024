@@ -3,9 +3,12 @@ import kotlin.math.min
 
 data class Point2(val x: Long, val y: Long) {
     constructor(x: Int, y: Int) : this(x.toLong(), y.toLong())
+    constructor() : this(0, 0)
     operator fun plus(v: Vec2) = Point2(x + v.x, y + v.y)
     operator fun minus(v: Vec2) = Point2(x - v.x, y - v.y)
     operator fun minus(p: Point2) = Vec2(x - p.x, y - p.y)
+
+    override fun toString() = "($x, $y)"
 
     /**
      * Find quadrant assuming a zero based grid of size w, h
@@ -130,12 +133,26 @@ class SparseGrid<T>(val defaultValue: T) {
         }
     }
 
+    override fun toString() = toBoundedString()
+
     fun toBoundedString(mapper: ((T) -> String)? = null): String {
         val sb = StringBuilder()
         for(y in minY..maxY) {
             for(x in minX..maxX) {
                 val v = get(x, y)
                 sb.append(mapper?.invoke(v) ?: v)
+            }
+            sb.append("\n")
+        }
+        return sb.toString()
+    }
+
+    fun overlay(mapper: (Point2, T) -> T): String {
+        val sb = StringBuilder()
+        for(y in minY..maxY) {
+            for(x in minX..maxX) {
+                val v = get(x, y)
+                sb.append(mapper.invoke(Point2(x, y), v) ?: v)
             }
             sb.append("\n")
         }
